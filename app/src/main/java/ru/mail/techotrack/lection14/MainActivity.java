@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
 		button4.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				createSimpleNotification(MainActivity.this);
+				createProgressNotification(MainActivity.this);
 			}
 		});
 	}
@@ -214,6 +214,57 @@ public class MainActivity extends Activity {
 
 		NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.notify(10, nc);
+	}
+
+	void createProgressNotification(Context context) {
+		String msg = "" + count + " - Пока уже таки покормить рыбок, они почти сдохли, это специально длинный текст такой чтобы не влезло";
+		count++;
+
+		Intent notificationIntent = new Intent(context, HelperActivity.class);
+		notificationIntent.putExtra("notification", true);
+		PendingIntent contentIntent = PendingIntent.getActivity(context,
+				10, notificationIntent,
+				PendingIntent.FLAG_CANCEL_CURRENT);
+		final NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+		final Notification.Builder builder = new Notification.Builder(context);
+		builder.setContentIntent(contentIntent)
+				.setSmallIcon(R.drawable.technotrack_24)
+				.setContentTitle("To do")
+				//.setStyle(new Notification.BigTextStyle().bigText(msg));
+				.setContentText(msg);
+// Start a lengthy operation in a background thread
+		new Thread(
+				new Runnable() {
+					@Override
+					public void run() {
+						int incr;
+						// Do the "lengthy" operation 20 times
+						for (incr = 0; incr <= 100; incr+=5) {
+							// Sets the progress indicator to a max value, the
+							// current completion percentage, and "determinate"
+							// state
+							builder.setProgress(100, incr, false);
+							// Displays the progress bar for the first time.
+							nm.notify(0, builder.build());
+							// Sleeps the thread, simulating an operation
+							// that takes time
+							try {
+								// Sleep for 5 seconds
+								Thread.sleep(5*1000);
+							} catch (InterruptedException e) {
+								Log.d(TAG, "sleep failure");
+							}
+						}
+						// When the loop is finished, updates the notification
+						builder.setContentText("Download complete")
+								// Removes the progress bar
+								.setProgress(0,0,false);
+						nm.notify(123, builder.build());
+					}
+				}
+// Starts the thread by calling the run() method in its Runnable
+		).start();
+
 	}
 
 
