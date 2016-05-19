@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.View;
 import android.widget.Button;
@@ -22,8 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
+	private static final String TAG = "MainActivity";
 
-	private static List<String> messages = new ArrayList<>();
+	public static List<String> messages = new ArrayList<>();
 	private static int count = 0;
 
 	@Override
@@ -55,7 +57,7 @@ public class MainActivity extends Activity {
 		button3.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				createSimpleNotification(MainActivity.this);
+				createActionNotification(MainActivity.this);
 			}
 		});
 		button4.setOnClickListener(new View.OnClickListener() {
@@ -77,19 +79,27 @@ public class MainActivity extends Activity {
 				Toast toast = Toast.makeText(getApplicationContext(),
 						"Нажали на пуш!", Toast.LENGTH_SHORT);
 				toast.show();
+				Log.d(TAG, "onStart() called with: " + "notification");
 			}
 			if (bundle.getBoolean("todo")) {
 				Toast toast = Toast.makeText(getApplicationContext(),
 						"Нажали на действие в пуше!", Toast.LENGTH_SHORT);
 				toast.show();
+				Log.d(TAG, "onStart() called with: " + "notification");
 
 			}
 		}
 	}
 
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		Log.d(TAG, "onNewIntent() called with: " + "intent = [" + intent + "]");
+		setIntent(intent);
+	}
+
 	void createSimpleNotification(Context context) {
-		Intent notificationIntent = new Intent(context, MainActivity.class);
-		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		Intent notificationIntent = new Intent(context, HelperActivity.class);
 		notificationIntent.putExtra("notification", true);
 		PendingIntent contentIntent = PendingIntent.getActivity(context,
 				0, notificationIntent,
@@ -135,8 +145,8 @@ public class MainActivity extends Activity {
 	}
 
 	void createGroupNotification(Context context) {
-		Intent notificationIntent = new Intent(context, MainActivity.class);
-		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		Intent notificationIntent = new Intent(context, HelperActivity.class);
+		notificationIntent.putExtra("notification", true);
 		PendingIntent contentIntent = PendingIntent.getActivity(context,
 				2, notificationIntent,
 				PendingIntent.FLAG_CANCEL_CURRENT);
@@ -153,13 +163,14 @@ public class MainActivity extends Activity {
 				.setWhen(System.currentTimeMillis())
 				.setShowWhen(true)
 				.setAutoCancel(true)
+				.setUsesChronometer(true)
 				.setContentTitle("Напоминание");
 				//.setStyle(new Notification.BigTextStyle().bigText(msg));
 				//.setContentText(msg);
 
 
 		Notification.InboxStyle inbox = new Notification.InboxStyle(builder);
-		inbox.addLine(msg);
+		//inbox.addLine(msg);
 
 		int count = 0;
 		int more = 0;
@@ -184,15 +195,13 @@ public class MainActivity extends Activity {
 
 	@TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
 	void createActionNotification(Context context) {
-		Intent notificationIntent = new Intent(context, MainActivity.class);
-		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		Intent notificationIntent = new Intent(context, HelperActivity.class);
 		notificationIntent.putExtra("notification", true);
 		PendingIntent contentIntent = PendingIntent.getActivity(context,
 				3, notificationIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 
-		Intent notificationTodo = new Intent(context, MainActivity.class);
-		notificationTodo.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		Intent notificationTodo = new Intent(context, HelperActivity.class);
 		notificationIntent.putExtra("todo", true);
 		PendingIntent piTodo = PendingIntent.getActivity(context,
 				1, notificationIntent,
