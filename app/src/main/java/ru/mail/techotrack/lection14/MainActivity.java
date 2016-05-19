@@ -68,36 +68,6 @@ public class MainActivity extends Activity {
 		});
 	}
 
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		Bundle bundle = getIntent().getExtras();
-		if (bundle != null) {
-			if (bundle.getBoolean("notification")) {
-				messages.clear();
-				Toast toast = Toast.makeText(getApplicationContext(),
-						"Нажали на пуш!", Toast.LENGTH_SHORT);
-				toast.show();
-				Log.d(TAG, "onStart() called with: " + "notification");
-			}
-			if (bundle.getBoolean("todo")) {
-				Toast toast = Toast.makeText(getApplicationContext(),
-						"Нажали на действие в пуше!", Toast.LENGTH_SHORT);
-				toast.show();
-				Log.d(TAG, "onStart() called with: " + "notification");
-
-			}
-		}
-	}
-
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		Log.d(TAG, "onNewIntent() called with: " + "intent = [" + intent + "]");
-		setIntent(intent);
-	}
-
 	void createSimpleNotification(Context context) {
 		Intent notificationIntent = new Intent(context, HelperActivity.class);
 		notificationIntent.putExtra("notification", true);
