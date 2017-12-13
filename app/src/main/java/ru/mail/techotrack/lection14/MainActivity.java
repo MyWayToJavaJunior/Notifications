@@ -3,11 +3,14 @@ package ru.mail.techotrack.lection14;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,13 +37,11 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		Button button1 = (Button)findViewById(R.id.send_notification_1);
-		assert button1 != null;
 		Button button2 = (Button)findViewById(R.id.send_notification_2);
-		assert button2 != null;
 		Button button3 = (Button)findViewById(R.id.send_notification_3);
-		assert button3 != null;
 		Button button4 = (Button)findViewById(R.id.send_notification_4);
-		assert button4 != null;
+		Button button5 = (Button)findViewById(R.id.send_notification_5);
+
 		button1.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -64,6 +65,12 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				createProgressNotification(MainActivity.this);
+			}
+		});
+		button5.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				createChannelNotification(MainActivity.this);
 			}
 		});
 	}
@@ -91,27 +98,22 @@ public class MainActivity extends Activity {
 				//.setStyle(new Notification.BigTextStyle().bigText(msg));
 				.setContentText(msg);
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder.setChannelId(getChannelId("my_channel_id", "My default Channel", "my_group_id", "My default Group"));
+		}
 
 		int defaults = 0;
 		defaults |= Notification.DEFAULT_VIBRATE;
+		defaults |= Notification.DEFAULT_SOUND;
 
-		String sound = null;
-		if (sound != null) {
-			if (sound.equals("default")) {
-				defaults |= Notification.DEFAULT_SOUND;
-			} else {
-				Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
-				builder.setSound(soundUri);
-			}
-		} else {
-			defaults |= Notification.DEFAULT_SOUND;
-		}
 		builder.setDefaults(defaults);
 
 		Notification nc = builder.build();
 
 		NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(10, nc);
+		if (nm != null) {
+			nm.notify(10, nc);
+		}
 	}
 
 	void createGroupNotification(Context context) {
@@ -138,6 +140,9 @@ public class MainActivity extends Activity {
 				//.setStyle(new Notification.BigTextStyle().bigText(msg));
 				//.setContentText(msg);
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder.setChannelId(getChannelId("my_channel_id", "My default Channel", "my_group_id", "My default Group"));
+		}
 
 		Notification.InboxStyle inbox = new Notification.InboxStyle(builder);
 		//inbox.addLine(msg);
@@ -159,7 +164,9 @@ public class MainActivity extends Activity {
 		Notification nc = inbox.build();
 
 		NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(13, nc);
+		if (nm != null) {
+			nm.notify(13, nc);
+		}
 	}
 
 
@@ -193,27 +200,104 @@ public class MainActivity extends Activity {
 				//.setStyle(new Notification.BigTextStyle().bigText(msg));
 				.setContentText(msg);
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder.setChannelId(getChannelId("my_channel_id", "My default Channel", "my_group_id", "My default Group"));
+		}
 
 		int defaults = 0;
 		defaults |= Notification.DEFAULT_VIBRATE;
-
-		String sound = null;
-		if (sound != null) {
-			if (sound.equals("default")) {
-				defaults |= Notification.DEFAULT_SOUND;
-			} else {
-				Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
-				builder.setSound(soundUri);
-			}
-		} else {
-			defaults |= Notification.DEFAULT_SOUND;
-		}
+		defaults |= Notification.DEFAULT_SOUND;
 		builder.setDefaults(defaults);
 
 		Notification nc = builder.build();
 
 		NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(10, nc);
+		if (nm != null) {
+			nm.notify(10, nc);
+		}
+	}
+
+	void createChannelNotification(Context context) {
+		Intent notificationIntent = new Intent(context, HelperActivity.class);
+		notificationIntent.putExtra("notification", true);
+		PendingIntent contentIntent = PendingIntent.getActivity(context,
+				0, notificationIntent,
+				PendingIntent.FLAG_CANCEL_CURRENT);
+
+		String msg = "" + count + " - Пока уже таки покормить рыбок, они почти сдохли, это специально длинный текст такой чтобы не влезло";
+		count++;
+
+		Notification.Builder builder = new Notification.Builder(context);
+		builder.setContentIntent(contentIntent)
+				.setSmallIcon(R.drawable.technotrack_24)
+				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.technotrack_128))
+				.setTicker("Last china warning")
+				.setWhen(System.currentTimeMillis())
+				.setShowWhen(true)
+				.setAutoCancel(true)
+				.setContentTitle("Напоминание")
+				.setContentText(msg);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder.setChannelId(getChannelId("my_second_channel_id", "My second Channel", "my_second_group_id", "My second Group"));
+		}
+		int defaults = 0;
+		defaults |= Notification.DEFAULT_VIBRATE;
+		defaults |= Notification.DEFAULT_SOUND;
+
+		builder.setDefaults(defaults);
+
+		Notification nc = builder.build();
+
+		NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+		if (nm != null) {
+			nm.notify(30, nc);
+		}
+	}
+
+	@TargetApi(Build.VERSION_CODES.O)
+	String getChannelId(String channelId, String name, String groupId, String groupName) {
+		NotificationManager nm =
+				(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		if (nm != null) {
+			List<NotificationChannel> channels = nm.getNotificationChannels();
+			for(NotificationChannel channel : channels) {
+				if (channel.getId().equals(channelId)) {
+					return channel.getId();
+				}
+			}
+
+			String group = getNotificationChannelGroupId(groupId, groupName);
+			int importance = NotificationManager.IMPORTANCE_LOW;
+			NotificationChannel notificationChannel = new NotificationChannel(channelId, name, importance);
+			notificationChannel.enableLights(true);
+			notificationChannel.setLightColor(Color.RED);
+			notificationChannel.enableVibration(true);
+
+			notificationChannel.setGroup(group); // set custom group
+
+			notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+			nm.createNotificationChannel(notificationChannel);
+
+			return channelId;
+		}
+		return null;
+	}
+
+	@TargetApi(Build.VERSION_CODES.O)
+	String getNotificationChannelGroupId(String groupId, String name) {
+		NotificationManager nm =
+				(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		if (nm != null) {
+			List<NotificationChannelGroup> groups = nm.getNotificationChannelGroups();
+			for(NotificationChannelGroup group : groups) {
+				if (group.getId().equals(groupId)) {
+					return group.getId();
+				}
+			}
+			nm.createNotificationChannelGroup(new NotificationChannelGroup(groupId, name));
+			return groupId;
+		}
+		return null;
 	}
 
 	void createProgressNotification(Context context) {
@@ -232,6 +316,11 @@ public class MainActivity extends Activity {
 				.setContentTitle("To do")
 				//.setStyle(new Notification.BigTextStyle().bigText(msg));
 				.setContentText(msg);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder.setChannelId(getChannelId("my_channel_id", "My default Channel", "my_group_id", "My default Group"));
+		}
+
 // Start a lengthy operation in a background thread
 		new Thread(
 				new Runnable() {
